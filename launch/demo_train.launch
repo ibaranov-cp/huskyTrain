@@ -49,4 +49,7 @@
     	<param name="port" value="/dev/ttyUSB0" />
     </node>
 
+    <node name="follower" pkg="huskyTrain" type="gen_follow.py">
+    </node>
+
 </launch>
