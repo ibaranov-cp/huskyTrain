@@ -49,7 +49,77 @@
     	<param name="port" value="/dev/ttyUSB0" />
     </node>
 
+    <!-- Robot localization package -->
+    <node pkg="robot_localization" type="ukf_localization_node" name="ukf_se" clear_params="true">
+    <rosparam command="load" file="$(find huskyTrain)/params/ukf_demo_train.yaml" />
+
+    <!--  Placeholder for output topic remapping
+    <remap from="odometry/filtered" to=""/>
+    -->
+
+    </node>
+
+    <!-- Short Python demo file, saves and loads goals, sends to move base-->
     <node name="follower" pkg="huskyTrain" type="gen_follow.py">
+    </node>
+
+    <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" respawn="true" output="screen">
+
+      <!-- Frequency of the main run loop. -->
+      <param name="frequency" value="5"/>
+
+      <param name="delay" value="3"/>
+
+      <!-- PLEASE READ: Like all nodes in robot_localization, this node assumes that your
+           IMU data is reported in the ENU frame. Many IMUs report data in the NED frame,
+           so you'll want to verify that your data is in the correct frame before using it.  -->
+
+      <!-- If your IMU does not account for magnetic declination, enter the value for your
+           location here. If you don't know it, see http://www.ngdc.noaa.gov/geomag-web/
+           (make sure to convert the value to radians). This parameter is mandatory. -->
+      <param name="magnetic_declination_radians" value="0.175"/>
+
+      <!-- Your IMU's yaw, once the magentic_declination_radians value is added to it, should
+           report 0 when facing east. If it doesn't, enter the offset here. Defaults to 0. -->
+      <param name="yaw_offset" value="0"/>
+
+      <!-- If this is true, the altitude is set to 0 in the output odometry message. Defaults
+           to false. -->
+      <param name="zero_altitude" value="false"/>
+
+      <!-- If this is true, the transform world_frame->utm transform is broadcast
+           for use by other nodes. Defaults to false. -->
+      <param name="broadcast_utm_transform" value="true"/>
+
+      <!-- If this is true, all received odometry data is converted back to a lat/lon
+           and published as a NavSatFix message as /gps/filtered. Defaults to false. -->
+      <param name="publish_filtered_gps" value="true"/>
+
+      <!-- If this is true, the node ignores the IMU data and gets its heading from the
+           odometry source (typically the /odometry/filtered topic coming from one of
+           robot_localization's state estimation nodes). BE CAREFUL when using this!
+           The yaw value in your odometry source *must* be world-referenced, e.g., you
+           cannot use your odometry source for yaw if you have only one source for yaw
+           data and it has its differential or relative parameter set to true. Defaults
+           to false. -->
+      <param name="use_odometry_yaw" value="false"/>
+
+      <!-- If true, will retrieve the datum from the 'datum' parameter below, if available.
+           If no 'datum' parameter exists, navsat_transform_node will wait until the user
+           calls the 'datum' service with the SetDatum service message. -->
+      <param name="wait_for_datum" value="false"/>
+
+      <!-- Placeholders for input remapping. Set your topic names as the "to" values.
+      <remap from="/imu/data" to=""/>
+      <remap from="/odometry/filtered" to=""/>
+      <remap from="/gps/fix" to=""/>
+      -->
+
+      <!-- Placeholders for output remapping.
+      <remap from="/odometry/gps" to=""/>
+      <remap from="/gps/filtered" to=""/>
+      -->
+
     </node>
 
 </launch>
